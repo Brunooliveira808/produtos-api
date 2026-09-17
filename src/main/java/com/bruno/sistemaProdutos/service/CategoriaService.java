@@ -49,12 +49,6 @@ public class CategoriaService {
 	                            produto.getPreco()
 	                    )
 	            ).toList();
-		
-
-		
-		
-		
-		
 	}
 	
 	
