@@ -25,14 +25,13 @@ public class ProdutoMapper {
 		 
 		if (categorias.size() != request.categoriasIds().size()) {
 			throw new RuntimeException("Uma ou mais categorias não existem");
-	}	
+		}
 				
 		Produto produto = new Produto();
 		produto.setNome(request.nome());
 		produto.setPreco(request.preco());
 		produto.setCategorias(categorias);
-		
-		
+
 		return produto;
 	}
 	
@@ -45,8 +44,6 @@ public class ProdutoMapper {
 			produto.getCategorias().stream()
 				.map(Categoria::getNome)
 				.toList()
-			
-			
 		);
 	}
 }

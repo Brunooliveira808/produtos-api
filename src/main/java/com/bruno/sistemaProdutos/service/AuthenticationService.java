@@ -17,7 +17,7 @@ import com.bruno.sistemaProdutos.dto.RegisterRequestDto;
 import com.bruno.sistemaProdutos.dto.TokenResponseDto;
 import com.bruno.sistemaProdutos.entity.Roles;
 import com.bruno.sistemaProdutos.entity.Usuario;
-import com.bruno.sistemaProdutos.enums.RoleTypeEnum;
+import com.bruno.sistemaProdutos.enums.Role;
 import com.bruno.sistemaProdutos.repository.RolesRepository;
 import com.bruno.sistemaProdutos.repository.UsuarioRepository;
 
@@ -35,7 +35,7 @@ public class AuthenticationService {
     private final TokenProvider tokenProvider;
 
     @Value("${jwt.expiration}")
-    private Long expiration;;
+    private Long expiration;
     
 
     public void register(RegisterRequestDto dto) {
@@ -47,9 +47,9 @@ public class AuthenticationService {
         
         }
 
-        Roles role = rolesRepository.findByNome(RoleTypeEnum.ROLE_BASIC.name())
+        Roles role = rolesRepository.findByNome(Role.ROLE_BASIC.name())
             .orElseGet(() -> rolesRepository.save(Roles.builder()
-                .nome(RoleTypeEnum.ROLE_BASIC.name())
+                .nome(Role.ROLE_BASIC.name())
                 .build()));
 
         usuarioRepository.save(Usuario.builder()

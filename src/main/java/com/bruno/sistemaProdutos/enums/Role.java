@@ -1,6 +1,6 @@
 package com.bruno.sistemaProdutos.enums;
 
-public enum RoleTypeEnum {
+public enum Role {
 
     ROLE_BASIC,
     ROLE_ADMIN

@@ -9,8 +9,6 @@ import com.bruno.sistemaProdutos.entity.Categoria;
 @Component
 public class CategoriaMapper {
 
-	
-	
 	public Categoria toEntity(CategoriaRequest request) {
 		 
 		Categoria categoria = new Categoria();
@@ -21,7 +19,6 @@ public class CategoriaMapper {
 	}
 	
 	public CategoriaResponse toResponse(Categoria categoria) {
-		
 		return new CategoriaResponse(categoria.getId(), categoria.getNome());
 	}
 }
