@@ -10,3 +10,8 @@ services:
       - MYSQL_USER=
       - MYSQL_PASSWORD=
       - MYSQL_ROOT_PASSWORD=
+    volumes:
+      - dados_mysql:/var/lib/mysql
+
+volumes:
+  dados_mysql:
