@@ -89,13 +89,12 @@ public class ProdutoService {
 	}
 	
 	public ProdutoResponse atualizarProduto(Long id, ProdutoRequest request) {
-		
-	
+
 		Produto produto = produtoRepository.findById(id).orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 		produto.setNome(request.nome());
 		produto.setPreco(request.preco());
 		produto.setCategorias(categoriaRepository.findAllById(request.categoriasIds()));
-		
+
 	    produto = produtoRepository.save(produto);
 
 	    return produtoMapper.toResponse(produto);

@@ -1,5 +1,7 @@
 package com.bruno.sistemaProdutos.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +23,13 @@ public class AuthController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public void register(@RequestBody @Valid RegisterRequestDto registerRequestDto) {
-        authenticationService.register(registerRequestDto);
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDto registerRequestDto) {
+        if (registerRequestDto.email().isBlank() || registerRequestDto.password().isBlank()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("O nome do usuário e senha são obrigatórios.");
+        }
+        return authenticationService.register(registerRequestDto);
     }
     
     @PostMapping("/login")

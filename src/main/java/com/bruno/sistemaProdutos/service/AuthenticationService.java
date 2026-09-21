@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,14 +40,16 @@ public class AuthenticationService {
     private Long expiration;
     
 
-    public void register(RegisterRequestDto dto) {
+    public ResponseEntity<?> register(RegisterRequestDto dto) {
         Usuario usuario = usuarioRepository.findByEmail(dto.email())
             .orElse(null);
 
         if (usuario != null) {
-            throw new IllegalArgumentException("Email já registrado");
-        
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body("Este e-mail já está cadastrado.");
         }
+
 
         Roles role = rolesRepository.findByNome(Role.ROLE_BASIC.name())
             .orElseGet(() -> rolesRepository.save(Roles.builder()
@@ -58,7 +62,13 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(dto.password()))
                 .build());
 
+
+
         passwordEncoder.matches(dto.password(), "3425252533352535252");//testar o hash da senha para garantir que o passwordEncoder está funcionando corretamente, mesmo que a senha seja diferente do hash fornecido. Isso é útil para verificar se o passwordEncoder está configurado corretamente e pode ser usado para comparar senhas no processo de autenticação.
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("usuarioCriado");
     }
 
     public TokenResponseDto login(LoginRequestDto dto) throws Exception {

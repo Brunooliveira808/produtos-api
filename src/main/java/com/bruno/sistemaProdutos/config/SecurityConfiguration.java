@@ -26,7 +26,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
                 .csrf(AbstractHttpConfigurer::disable)//desabilitar proteção contra CSRF, pois estamos usando JWT e não sessões
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -40,6 +40,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/produto").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/categoria").permitAll()
                     .requestMatchers(HttpMethod.POST, "/categoria").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/produto").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/produto").hasRole("ADMIN")
@@ -56,7 +58,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
