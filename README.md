@@ -270,15 +270,18 @@ GET /categoria/{id}
 
 ✅ Integração com MySQL
 
+✅ Swagger/OpenAPI
+
+✅ CI com GitHub Actions
+
 ---
 
 # Próximas Evoluções
 
 - Testes automatizados com JUnit e Mockito
-- Swagger/OpenAPI
 - Dockerfile da aplicação
 - Containerização completa da API
-- CI/CD com GitHub Actions
+- CD com GitHub Actions
 - Cobertura de testes
 
 ---
