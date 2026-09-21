@@ -29,6 +29,13 @@ public class ProdutoService {
 		this.produtoMapper = produtoMapper;
 	}
 
+	public List<ProdutoResponse> busca(String categoria, double precoMin, double precoMax) {
+		return produtoRepository.findByCategoriasNomeIgnoreCase(categoria)
+				.stream()
+				.filter(produto -> produto.getPreco() >= precoMin && produto.getPreco() <= precoMax)
+				.map(produtoMapper::toResponse)
+				.toList();
+	}
 
 	public ProdutoResponse salvar(ProdutoRequest request) {
 		Produto produto = produtoMapper.toEntity(request);

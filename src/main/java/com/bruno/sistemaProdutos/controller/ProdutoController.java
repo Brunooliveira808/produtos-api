@@ -3,14 +3,7 @@ package com.bruno.sistemaProdutos.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.bruno.sistemaProdutos.dto.produto.ProdutoRequest;
 import com.bruno.sistemaProdutos.dto.produto.ProdutoResponse;
@@ -28,6 +21,15 @@ public class ProdutoController {
 		this.produtoService = produtoService;
 	}
 
+	@GetMapping
+	public ResponseEntity<List<ProdutoResponse>> busca(
+		@RequestParam(required = false) String categoria,
+		@RequestParam(required = false) double precoMin,
+		@RequestParam(required = false) double precoMax) {
+
+		return ResponseEntity.ok(produtoService.busca(categoria, precoMin, precoMax));
+	}
+
 	@GetMapping("/pagina/{page}")
 	public ResponseEntity<List<ProdutoResponse>> getProdutosPorPagina(@PathVariable int page) {
 		return ResponseEntity.ok(produtoService.listarProdutosPorPagina(page));
@@ -38,20 +40,33 @@ public class ProdutoController {
 		return ResponseEntity.ok(produtoService.listarProdutosPorNome(nome));
 	}
 
-	@GetMapping("/categoria/{categoria}")
-	public ResponseEntity<List<ProdutoResponse>> getProdutosPorCategoria(@PathVariable String categoria) {
-		return ResponseEntity.ok(produtoService.listarProdutosPorCategoria(categoria));
-	}
 
-	@GetMapping("/faixa-preco/{precoMin}/{precoMax}")
-	public ResponseEntity<List<ProdutoResponse>> getProdutosPorFaixaDePreco(@PathVariable double precoMin,
-			@PathVariable double precoMax) {
-		return ResponseEntity.ok(produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax));
-	}
 
 	@GetMapping("{id}")
 	public ResponseEntity<ProdutoResponse> produtoById(@PathVariable Long id) {
 		return ResponseEntity.ok(produtoService.buscarPorId(id));
+	}
+
+	@GetMapping("/categoria")
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByCategoriaQuery(@RequestParam String categoria) {
+		return ResponseEntity.ok(produtoService.listarProdutosPorCategoria(categoria));
+	}
+
+	@GetMapping("/categoria/{categoria}")
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByCategoria(@PathVariable String categoria) {
+		return ResponseEntity.ok(produtoService.listarProdutosPorCategoria(categoria));
+	}
+
+	@GetMapping("/faixa-preco")
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePrecoQuery(@RequestParam double precoMin,
+																				@RequestParam double precoMax) {
+		return ResponseEntity.ok(produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax));
+	}
+
+	@GetMapping("/faixa-preco/{precoMin}/{precoMax}")
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePreco(@PathVariable double precoMin,
+			@PathVariable double precoMax) {
+		return ResponseEntity.ok(produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax));
 	}
 
 	@PostMapping
