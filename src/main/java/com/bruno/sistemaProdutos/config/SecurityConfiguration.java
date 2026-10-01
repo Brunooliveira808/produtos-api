@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity // diz para a classe que existe um bean de configuração
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
