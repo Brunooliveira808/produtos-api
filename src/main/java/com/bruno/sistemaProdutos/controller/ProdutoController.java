@@ -40,8 +40,6 @@ public class ProdutoController {
 		return ResponseEntity.ok(produtoService.listarProdutosPorNome(nome));
 	}
 
-
-
 	@GetMapping("{id}")
 	public ResponseEntity<ProdutoResponse> produtoById(@PathVariable Long id) {
 		return ResponseEntity.ok(produtoService.buscarPorId(id));
