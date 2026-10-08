@@ -45,7 +45,7 @@ public class ProdutoService {
 
 	public ProdutoResponse buscarPorId(Long id) {
 		Produto produto = produtoRepository.findById(id).orElseThrow(() -> new NotFoundException("Produto não encontrado"));
-		
+
 		return produtoMapper.toResponse(produto);
 	}
 	
@@ -54,10 +54,6 @@ public class ProdutoService {
 				.stream()
 				.map(produtoMapper::toResponse)
 				.toList();
-	}
-
-	public List<ProdutoResponse> listarTodosProdutos() {
-		return produtoRepository.findAll().stream().map(produtoMapper::toResponse).toList();
 	}
 
 	public List<ProdutoResponse> listarProdutosPorNome(String nome) {

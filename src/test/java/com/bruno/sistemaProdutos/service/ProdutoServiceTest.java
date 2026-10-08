@@ -102,9 +102,7 @@ public class ProdutoServiceTest {
     void deveLancarNotFoundExceptionQuandoProdutoNaoEncontradoPorId() {
         when(produtoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            produtoService.buscarPorId(99L);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> produtoService.buscarPorId(99L));
 
         assertEquals("Produto não encontrado", exception.getMessage());
         verify(produtoRepository, times(1)).findById(99L);
@@ -127,7 +125,7 @@ public class ProdutoServiceTest {
 
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        assertEquals("Smartphone", resultado.get(0).nome());
+        assertEquals("Smartphone", resultado.getFirst().nome());
         verify(produtoRepository, times(1)).findByCategoriasNomeIgnoreCase("Eletrônicos");
     }
 
@@ -211,7 +209,7 @@ public class ProdutoServiceTest {
 
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        assertEquals("Smartphone", resultado.get(0).nome());
+        assertEquals("Smartphone", resultado.getFirst().nome());
         verify(produtoRepository, times(1)).findAll();
     }
 

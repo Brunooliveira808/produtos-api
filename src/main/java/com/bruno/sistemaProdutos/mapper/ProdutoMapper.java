@@ -2,6 +2,7 @@ package com.bruno.sistemaProdutos.mapper;
 
 import java.util.List;
 
+import com.bruno.sistemaProdutos.dto.produto.ProdutoResumoResponse;
 import org.springframework.stereotype.Component;
 
 import com.bruno.sistemaProdutos.dto.produto.ProdutoRequest;
@@ -44,6 +45,14 @@ public class ProdutoMapper {
 			produto.getCategorias().stream()
 				.map(Categoria::getNome)
 				.toList()
+		);
+	}
+
+	public ProdutoResumoResponse toResumoResponse(Produto produto) {
+		return new ProdutoResumoResponse(
+				produto.getId(),
+				produto.getNome(),
+				produto.getPreco()
 		);
 	}
 }

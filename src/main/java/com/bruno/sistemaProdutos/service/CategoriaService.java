@@ -2,6 +2,7 @@ package com.bruno.sistemaProdutos.service;
 
 import java.util.List;
 
+import com.bruno.sistemaProdutos.mapper.ProdutoMapper;
 import org.springframework.stereotype.Service;
 
 import com.bruno.sistemaProdutos.dto.categoria.CategoriaRequest;
@@ -18,11 +19,13 @@ public class CategoriaService {
 	
 	private final CategoriaRepository categoriaRepository;
 	private final CategoriaMapper categoriaMapper;
+	private final ProdutoMapper produtoMapper;
 	
-	public CategoriaService(CategoriaRepository categoriaRepository, CategoriaMapper categoriaMapper) {
+	public CategoriaService(CategoriaRepository categoriaRepository, CategoriaMapper categoriaMapper, ProdutoMapper produtoMapper) {
 		super();
 		this.categoriaRepository = categoriaRepository;
 		this.categoriaMapper = categoriaMapper;
+		this.produtoMapper = produtoMapper;
 	}
 	
 	public CategoriaResponse salvar(CategoriaRequest request) {
@@ -42,13 +45,7 @@ public class CategoriaService {
 		
 	    return categoria.getProdutos()
 	            .stream()
-	            .map(produto ->
-	                    new ProdutoResumoResponse(
-	                            produto.getId(),
-	                            produto.getNome(),
-	                            produto.getPreco()
-	                    )
-	            ).toList();
+	            .map(produtoMapper::toResumoResponse).toList();
 	}
 	
 	
