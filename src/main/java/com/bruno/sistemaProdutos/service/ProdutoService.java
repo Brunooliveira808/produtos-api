@@ -4,6 +4,8 @@ package com.bruno.sistemaProdutos.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.bruno.sistemaProdutos.dto.produto.ProdutoRequest;
@@ -65,27 +67,15 @@ public class ProdutoService {
 				.map(produtoMapper::toResponse)
 				.toList();
 	}
-	
-	public List<ProdutoResponse> listarProdutosPorPagina(int page) {
-		int pageSize = 9; // Defina o tamanho da página
-		int offset = (page - 1) * pageSize; // Calcule o deslocamento com base na página
 
-		return produtoRepository.findAll()
-				.stream()
-				.skip(offset) // Pule os registros anteriores
-				.limit(pageSize) // Limite o número de registros retornados
-				.map(produtoMapper::toResponse)
-				.toList();
+	public Page<ProdutoResponse> listarProdutosPorPagina(Pageable pageable) {
+		return produtoRepository.findAll(pageable)
+				.map(produtoMapper::toResponse);
 	}
 
-	public List<ProdutoResponse> listarProdutosPorFaixaDePreco(BigDecimal precoMin, BigDecimal precoMax) {
-		return produtoRepository.findAll()
-				.stream()
-				.filter(produto -> produto.getPreco() != null
-						&& (precoMin == null || produto.getPreco().compareTo(precoMin) >= 0)
-						&& (precoMax == null || produto.getPreco().compareTo(precoMax) <= 0))
-				.map(produtoMapper::toResponse)
-				.toList();
+	public Page<ProdutoResponse> listarProdutosPorFaixaDePreco(BigDecimal precoMin, BigDecimal precoMax, Pageable pageable) {
+		return produtoRepository.findByPrecoBetween(precoMin, precoMax, pageable)
+				.map(produtoMapper::toResponse);
 	}
 	
 	public void removerProduto(Long id) {

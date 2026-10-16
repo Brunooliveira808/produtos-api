@@ -16,8 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -161,57 +165,42 @@ public class ProdutoServiceTest {
     @Test
     @DisplayName("Deve listar produtos por página")
     void deveListarProdutosPorPagina() {
-        List<Produto> listaProdutos = new ArrayList<>();
-        for (int i = 1; i <= 15; i++) {
-            Produto p = new Produto();
-            p.setId((long) i);
-            p.setNome("Produto " + i);
-            p.setPreco(BigDecimal.valueOf(10.0 * i));
-            p.setCategorias(List.of(categoria));
-            listaProdutos.add(p);
-        }
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Produto> listaProdutos = List.of(produto);
+        Page<Produto> pageProdutos = new PageImpl<>(listaProdutos, pageable, 1);
 
-        when(produtoRepository.findAll()).thenReturn(listaProdutos);
-        when(produtoMapper.toResponse(any(Produto.class))).thenAnswer(invocation -> {
-            Produto p = invocation.getArgument(0);
-            return new ProdutoResponse(p.getId(), p.getNome(), p.getPreco(), List.of("Eletrônicos"));
-        });
+        when(produtoRepository.findAll(pageable)).thenReturn(pageProdutos);
+        when(produtoMapper.toResponse(produto)).thenReturn(produtoResponse);
 
-        // Página 1: 9 itens (offset 0 a 8)
-        List<ProdutoResponse> pagina1 = produtoService.listarProdutosPorPagina(1);
-        assertEquals(9, pagina1.size());
-        assertEquals("Produto 1", pagina1.get(0).nome());
-        assertEquals("Produto 9", pagina1.get(8).nome());
+        Page<ProdutoResponse> resultado = produtoService.listarProdutosPorPagina(pageable);
 
-        // Página 2: 6 itens (offset 9 a 14)
-        List<ProdutoResponse> pagina2 = produtoService.listarProdutosPorPagina(2);
-        assertEquals(6, pagina2.size());
-        assertEquals("Produto 10", pagina2.get(0).nome());
-        assertEquals("Produto 15", pagina2.get(5).nome());
+        assertNotNull(resultado);
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(1, resultado.getContent().size());
+        assertEquals("Smartphone", resultado.getContent().getFirst().nome());
+        verify(produtoRepository, times(1)).findAll(pageable);
+        verify(produtoMapper, times(1)).toResponse(produto);
     }
 
     @Test
     @DisplayName("Deve listar produtos por faixa de preço")
     void deveListarProdutoPorFaixaDePreco() {
-        Produto barato = new Produto();
-        barato.setId(2L);
-        barato.setNome("Fone de Ouvido");
-        barato.setPreco(new BigDecimal("50.00"));
+        Pageable pageable = PageRequest.of(0, 10);
+        BigDecimal precoMin = new BigDecimal("500.00");
+        BigDecimal precoMax = new BigDecimal("2000.00");
+        Page<Produto> pageProdutos = new PageImpl<>(List.of(produto), pageable, 1);
 
-        Produto caro = new Produto();
-        caro.setId(3L);
-        caro.setNome("TV 4K");
-        caro.setPreco(new BigDecimal("4000.00"));
-
-        when(produtoRepository.findAll()).thenReturn(List.of(produto, barato, caro));
+        when(produtoRepository.findByPrecoBetween(precoMin, precoMax, pageable)).thenReturn(pageProdutos);
         when(produtoMapper.toResponse(produto)).thenReturn(produtoResponse);
 
-        List<ProdutoResponse> resultado = produtoService.listarProdutosPorFaixaDePreco(new BigDecimal("500.00"), new BigDecimal("2000.00"));
+        Page<ProdutoResponse> resultado = produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax, pageable);
 
         assertNotNull(resultado);
-        assertEquals(1, resultado.size());
-        assertEquals("Smartphone", resultado.getFirst().nome());
-        verify(produtoRepository, times(1)).findAll();
+        assertEquals(1, resultado.getTotalElements());
+        assertEquals(1, resultado.getContent().size());
+        assertEquals("Smartphone", resultado.getContent().getFirst().nome());
+        verify(produtoRepository, times(1)).findByPrecoBetween(precoMin, precoMax, pageable);
+        verify(produtoMapper, times(1)).toResponse(produto);
     }
 
     @Test
