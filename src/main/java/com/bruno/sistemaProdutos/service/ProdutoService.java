@@ -1,6 +1,7 @@
 package com.bruno.sistemaProdutos.service;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -29,10 +30,12 @@ public class ProdutoService {
 		this.produtoMapper = produtoMapper;
 	}
 
-	public List<ProdutoResponse> busca(String categoria, double precoMin, double precoMax) {
+	public List<ProdutoResponse> busca(String categoria, BigDecimal precoMin, BigDecimal precoMax) {
 		return produtoRepository.findByCategoriasNomeIgnoreCase(categoria)
 				.stream()
-				.filter(produto -> produto.getPreco() >= precoMin && produto.getPreco() <= precoMax)
+				.filter(produto -> produto.getPreco() != null
+						&& (precoMin == null || produto.getPreco().compareTo(precoMin) >= 0)
+						&& (precoMax == null || produto.getPreco().compareTo(precoMax) <= 0))
 				.map(produtoMapper::toResponse)
 				.toList();
 	}
@@ -75,10 +78,12 @@ public class ProdutoService {
 				.toList();
 	}
 
-	public List<ProdutoResponse> listarProdutosPorFaixaDePreco(double precoMin, double precoMax) {
+	public List<ProdutoResponse> listarProdutosPorFaixaDePreco(BigDecimal precoMin, BigDecimal precoMax) {
 		return produtoRepository.findAll()
 				.stream()
-				.filter(produto -> produto.getPreco() >= precoMin && produto.getPreco() <= precoMax)
+				.filter(produto -> produto.getPreco() != null
+						&& (precoMin == null || produto.getPreco().compareTo(precoMin) >= 0)
+						&& (precoMax == null || produto.getPreco().compareTo(precoMax) <= 0))
 				.map(produtoMapper::toResponse)
 				.toList();
 	}

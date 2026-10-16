@@ -1,5 +1,6 @@
 package com.bruno.sistemaProdutos.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,8 @@ public class ProdutoController {
 	@GetMapping
 	public ResponseEntity<List<ProdutoResponse>> busca(
 		@RequestParam(required = false) String categoria,
-		@RequestParam(required = false) double precoMin,
-		@RequestParam(required = false) double precoMax) {
+		@RequestParam(required = false) BigDecimal precoMin,
+		@RequestParam(required = false) BigDecimal precoMax) {
 
 		return ResponseEntity.ok(produtoService.busca(categoria, precoMin, precoMax));
 	}
@@ -56,14 +57,14 @@ public class ProdutoController {
 	}
 
 	@GetMapping("/faixa-preco")
-	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePrecoQuery(@RequestParam double precoMin,
-																				@RequestParam double precoMax) {
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePrecoQuery(@RequestParam BigDecimal precoMin,
+																				@RequestParam BigDecimal precoMax) {
 		return ResponseEntity.ok(produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax));
 	}
 
 	@GetMapping("/faixa-preco/{precoMin}/{precoMax}")
-	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePreco(@PathVariable double precoMin,
-			@PathVariable double precoMax) {
+	public ResponseEntity<List<ProdutoResponse>> getProdutosByFaixaDePreco(@PathVariable BigDecimal precoMin,
+			@PathVariable BigDecimal precoMax) {
 		return ResponseEntity.ok(produtoService.listarProdutosPorFaixaDePreco(precoMin, precoMax));
 	}
 

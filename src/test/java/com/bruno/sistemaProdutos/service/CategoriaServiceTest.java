@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -54,10 +55,10 @@ public class CategoriaServiceTest {
         produto = new Produto();
         produto.setId(1L);
         produto.setNome("Smartphone");
-        produto.setPreco(1500.0);
+        produto.setPreco(new BigDecimal("1500.00"));
         produto.setCategorias(List.of(categoria));
 
-        produtoResumoResponse = new ProdutoResumoResponse(1L, "Smartphone", 1500.0);
+        produtoResumoResponse = new ProdutoResumoResponse(1L, "Smartphone", new BigDecimal("1500.00"));
         categoriaRequest = new CategoriaRequest("Eletrônicos");
         categoriaResponse = new CategoriaResponse(1L, "Eletrônicos");
     }

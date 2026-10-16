@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,11 +53,11 @@ public class ProdutoServiceTest {
         produto = new Produto();
         produto.setId(1L);
         produto.setNome("Smartphone");
-        produto.setPreco(1500.0);
+        produto.setPreco(new BigDecimal("1500.00"));
         produto.setCategorias(List.of(categoria));
 
-        produtoRequest = new ProdutoRequest("Smartphone", 1500.0, List.of(1L));
-        produtoResponse = new ProdutoResponse(1L, "Smartphone", 1500.0, List.of("Eletrônicos"));
+        produtoRequest = new ProdutoRequest("Smartphone", new BigDecimal("1500.00"), List.of(1L));
+        produtoResponse = new ProdutoResponse(1L, "Smartphone", new BigDecimal("1500.00"), List.of("Eletrônicos"));
     }
 
     @Test
@@ -115,13 +116,13 @@ public class ProdutoServiceTest {
         Produto produto2 = new Produto();
         produto2.setId(2L);
         produto2.setNome("Notebook");
-        produto2.setPreco(3000.0);
+        produto2.setPreco(new BigDecimal("3000.00"));
         produto2.setCategorias(List.of(categoria));
 
         when(produtoRepository.findByCategoriasNomeIgnoreCase("Eletrônicos")).thenReturn(List.of(produto, produto2));
         when(produtoMapper.toResponse(produto)).thenReturn(produtoResponse);
 
-        List<ProdutoResponse> resultado = produtoService.busca("Eletrônicos", 1000.0, 2000.0);
+        List<ProdutoResponse> resultado = produtoService.busca("Eletrônicos", new BigDecimal("1000.00"), new BigDecimal("2000.00"));
 
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
@@ -165,7 +166,7 @@ public class ProdutoServiceTest {
             Produto p = new Produto();
             p.setId((long) i);
             p.setNome("Produto " + i);
-            p.setPreco(10.0 * i);
+            p.setPreco(BigDecimal.valueOf(10.0 * i));
             p.setCategorias(List.of(categoria));
             listaProdutos.add(p);
         }
@@ -195,17 +196,17 @@ public class ProdutoServiceTest {
         Produto barato = new Produto();
         barato.setId(2L);
         barato.setNome("Fone de Ouvido");
-        barato.setPreco(50.0);
+        barato.setPreco(new BigDecimal("50.00"));
 
         Produto caro = new Produto();
         caro.setId(3L);
         caro.setNome("TV 4K");
-        caro.setPreco(4000.0);
+        caro.setPreco(new BigDecimal("4000.00"));
 
         when(produtoRepository.findAll()).thenReturn(List.of(produto, barato, caro));
         when(produtoMapper.toResponse(produto)).thenReturn(produtoResponse);
 
-        List<ProdutoResponse> resultado = produtoService.listarProdutosPorFaixaDePreco(500.0, 2000.0);
+        List<ProdutoResponse> resultado = produtoService.listarProdutosPorFaixaDePreco(new BigDecimal("500.00"), new BigDecimal("2000.00"));
 
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
@@ -241,8 +242,8 @@ public class ProdutoServiceTest {
     @Test
     @DisplayName("Deve atualizar produto com sucesso")
     void deveAtualizarProdutoComSucesso() {
-        ProdutoRequest requestAtualizacao = new ProdutoRequest("Smartphone Pro", 2000.0, List.of(1L));
-        ProdutoResponse responseAtualizado = new ProdutoResponse(1L, "Smartphone Pro", 2000.0, List.of("Eletrônicos"));
+        ProdutoRequest requestAtualizacao = new ProdutoRequest("Smartphone Pro", new BigDecimal("2000.00"), List.of(1L));
+        ProdutoResponse responseAtualizado = new ProdutoResponse(1L, "Smartphone Pro", new BigDecimal("2000.00"), List.of("Eletrônicos"));
 
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         when(categoriaRepository.findAllById(List.of(1L))).thenReturn(List.of(categoria));
@@ -253,7 +254,7 @@ public class ProdutoServiceTest {
 
         assertNotNull(resultado);
         assertEquals("Smartphone Pro", resultado.nome());
-        assertEquals(2000.0, resultado.preco());
+        assertEquals(new BigDecimal("2000.00"), resultado.preco());
 
         verify(produtoRepository, times(1)).findById(1L);
         verify(categoriaRepository, times(1)).findAllById(List.of(1L));
@@ -263,7 +264,7 @@ public class ProdutoServiceTest {
     @Test
     @DisplayName("Deve lançar NotFoundException ao tentar atualizar produto inexistente")
     void deveLancarNotFoundExceptionAoAtualizarProdutoInexistente() {
-        ProdutoRequest requestAtualizacao = new ProdutoRequest("Smartphone Pro", 2000.0, List.of(1L));
+        ProdutoRequest requestAtualizacao = new ProdutoRequest("Smartphone Pro", new BigDecimal("2000.00"), List.of(1L));
         when(produtoRepository.findById(99L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
