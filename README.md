@@ -1,289 +1,372 @@
 # Sistema de Produtos API
 
-API REST desenvolvida com Java e Spring Boot para gerenciamento de produtos, categorias e autenticação de usuários.
+API RESTful desenvolvida com **Java 21** e **Spring Boot** para gerenciamento de produtos, categorias e controle de acesso com autenticação e autorização via **JWT (JSON Web Token)**.
 
-O projeto foi construído com foco no aprendizado e aplicação de boas práticas do ecossistema Spring, utilizando arquitetura em camadas, DTOs, mapeamento de objetos, validações, tratamento global de exceções, autenticação JWT e integração com MySQL.
-
----
-
-# Tecnologias Utilizadas
-
-- Java 21
-- Spring Boot
-- Spring Web MVC
-- Spring Data JPA
-- Hibernate
-- Spring Security
-- JWT (JSON Web Token)
-- MySQL
-- Bean Validation
-- Lombok
-- Maven
-- Docker Compose
+O projeto foi construído seguindo as melhores práticas do ecossistema Spring: arquitetura em camadas, DTO Pattern com Java Records, validações declarativas com Bean Validation, mapeamento desacoplado de objetos, tratamento global de exceções, persistência relacional com Spring Data JPA/Hibernate, segurança stateless com Spring Security e documentação interativa via OpenAPI / Swagger.
 
 ---
 
-# Funcionalidades
+## 🛠️ Tecnologias Utilizadas
 
-## Produtos
-
-- Criar produto
-- Buscar produto por ID
-- Atualizar produto
-- Excluir produto
-- Listar produtos
-- Buscar por nome
-- Buscar por categoria
-- Buscar por faixa de preço
-- Paginação de resultados
-
-## Categorias
-
-- Criar categoria
-- Buscar categoria por ID
-- Listar categorias
-- Consultar produtos de uma categoria
-
-## Autenticação
-
-- Cadastro de usuários
-- Login de usuários
-- Geração de Token JWT
-- Validação automática de Token JWT
-- Controle de acesso baseado em Roles
-- Senhas protegidas com BCrypt
+- **Java 21 (LTS)**
+- **Spring Boot**
+- **Spring Web MVC**
+- **Spring Data JPA & Hibernate**
+- **Spring Security** (Autenticação Stateless e RBAC)
+- **JWT (io.jsonwebtoken / JJWT 0.12.6)**
+- **Springdoc OpenAPI (Swagger UI)**
+- **MySQL 8** (Banco de dados relacional)
+- **Bean Validation (Hibernate Validator)**
+- **Lombok**
+- **Apache Maven** (com Maven Wrapper `./mvnw`)
+- **Docker & Docker Compose**
+- **JUnit 5 & Mockito** (Testes unitários automatizados)
+- **GitHub Actions** (Pipeline de Integração Contínua - CI)
 
 ---
 
-# Conceitos Aplicados
+## 🚀 Funcionalidades
 
-## Arquitetura em Camadas
+### 🔐 Autenticação e Usuários
+- Cadastro de novos usuários com role padrão `ROLE_BASIC`.
+- Login com credenciais e geração de token JWT assinado com chave HMAC.
+- Proteção de senhas com hash criptográfico **BCrypt**.
+- Controle de acesso baseado em papéis (**RBAC**): `ROLE_BASIC` e `ROLE_ADMIN`.
 
-Controller
-↓
-Service
-↓
-Repository
-↓
-Database
+### 📦 Produtos
+- Cadastro de produto com associação a uma ou mais categorias (*Apenas ADMIN*).
+- Atualização completa de produto por ID (*Apenas ADMIN*).
+- Exclusão de produto por ID (*Apenas ADMIN*).
+- Listagem geral de produtos (com filtros opcionais por categoria, preço mínimo e máximo).
+- Consulta de produto por ID.
+- Consulta de produtos por nome (busca parcial/insensível a maiúsculas).
+- Consulta de produtos por categoria (via Path Variable ou Query Param).
+- Consulta com paginação configurável (`Pageable`).
+- Consulta por faixa de preço com paginação (`precoMin` e `precoMax`).
 
-## DTO Pattern
-
-Separação entre dados expostos pela API e entidades persistidas.
-
-## Mapper Pattern
-
-Conversão centralizada entre DTOs e entidades.
-
-## Repository Pattern
-
-Abstração do acesso aos dados utilizando Spring Data JPA.
-
-## Bean Validation
-
-Validação automática dos dados recebidos pela API.
-
-## Tratamento Global de Exceções
-
-Centralização de erros através de @ControllerAdvice.
-
-## Spring Security
-
-Implementação de autenticação e autorização baseada em JWT.
+### 🏷️ Categorias
+- Criação de nova categoria (*Apenas ADMIN*).
+- Listagem de todas as categorias cadastradas.
+- Consulta de produtos vinculados a uma categoria específica por ID.
 
 ---
 
-# Segurança
+## 📐 Modelagem de Dados
 
-A aplicação utiliza autenticação Stateless com JWT.
+### Entidades e Relacionamentos
 
-Rotas públicas:
-
-POST /auth/register
-POST /auth/login
-
-Rotas protegidas:
-
-- Produtos
-- Categorias
-
-Restrições de acesso:
-
-- ADMIN pode criar, alterar e remover produtos e categorias.
-- Usuários autenticados podem acessar recursos permitidos pelas regras da aplicação.
-
-Componentes implementados:
-
-- SecurityConfiguration
-- JwtAuthenticationFilter
-- TokenProvider
-- AuthenticationService
-- UserDetailsServiceImpl
-
----
-
-# Modelagem
-
-## Produto
-
-- id : Long
-- nome : String
-- preco : Double
-- categorias : List<Categoria>
-
-## Categoria
-
-- id : Long
-- nome : String
-- produtos : List<Produto>
-
----
-
-# Relacionamento
-
-Many-to-Many
-
-Produto ↔ Categoria
-
----
-
-# Estrutura do Projeto
-
-src/main/java
-
-├── controller
-├── service
-├── repository
-├── entity
-├── dto
-├── mapper
-├── config
-├── exception
-└── handler
-
----
-
-# Como Executar o Projeto
-
-## Requisitos
-
-Antes de iniciar, você precisará ter instalado em sua máquina:
-- **Docker** e **Docker Compose**
-- **Java 21 (JDK)**
-- **Maven** (opcional, o projeto possui o Maven Wrapper `./mvnw`)
-
-## Passo a Passo
-
-### 1. Iniciar o Banco de Dados (MySQL)
-O banco de dados roda em um container Docker. Para iniciá-lo em segundo plano, execute o seguinte comando na raiz do projeto:
-```bash
-sudo docker compose -f docker/docker-compose.yml up -d
+```mermaid
+erDiagram
+    USUARIOS ||--|{ USUARIO_ROLES : possui
+    ROLES ||--|{ USUARIO_ROLES : define
+    PRODUTO }|--|{ CATEGORIA : pertence
+    
+    USUARIOS {
+        bigint id PK
+        varchar email UK
+        varchar password
+    }
+    ROLES {
+        bigint id PK
+        varchar nome
+    }
+    PRODUTO {
+        bigint id PK
+        varchar nome
+        decimal preco
+    }
+    CATEGORIA {
+        bigint id PK
+        varchar nome
+    }
 ```
 
-Se precisar encerrar o container do banco:
-```bash
-sudo docker compose -f docker/docker-compose.yml down
+- **Produto ↔ Categoria**: Relacionamento `@ManyToMany` mapeado pela tabela de junção `produto_categorias`.
+- **Usuario ↔ Roles**: Relacionamento `@ManyToMany` (`FetchType.EAGER`) mapeado pela tabela `usuario_roles`.
+- **Preço**: Definido com `BigDecimal` (`precision = 19, scale = 2`) para garantir precisão monetária.
+
+---
+
+## 🔒 Regras de Segurança e Permissões
+
+A API adota o modelo de segurança **Stateless** gerenciado pelo `SecurityConfiguration`:
+
+| Rota / Endpoint | Método HTTP | Permissão Necessária |
+| :--- | :--- | :--- |
+| `/auth/register` | `POST` | Pública (Todos) |
+| `/auth/login` | `POST` | Pública (Todos) |
+| `/v3/api-docs/**`, `/swagger-ui/**`, `/swagger-ui.html` | `GET` | Pública (Documentação) |
+| `/produto` | `GET` | Pública (Todos) |
+| `/categoria` | `GET` | Pública (Todos) |
+| `/produto/{id}` | `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/produto/pagina`, `/produto/pagina/{page}` | `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/produto/nome/{nome}` | `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/produto/categoria`, `/produto/categoria/{categoria}` | `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/produto/faixa-preco`, `/produto/faixa-preco/{min}/{max}`| `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/categoria/{id}` | `GET` | Autenticado (`ROLE_BASIC` ou `ROLE_ADMIN`) |
+| `/produto` | `POST` | Exclusivo `ROLE_ADMIN` |
+| `/produto/{id}` | `PUT` | Exclusivo `ROLE_ADMIN` |
+| `/produto/{id}` | `DELETE` | Exclusivo `ROLE_ADMIN` |
+| `/categoria` | `POST` | Exclusivo `ROLE_ADMIN` |
+
+> [!NOTE]
+> Para acessar rotas autenticadas, informe o cabeçalho HTTP:
+> `Authorization: Bearer <seu_token_jwt>`
+
+---
+
+## 📑 Documentação da API
+
+### 1. Autenticação (`/auth`)
+
+#### Registrar Usuário
+- **POST** `/auth/register`
+- **Body:**
+```json
+{
+  "email": "usuario@exemplo.com",
+  "password": "senhaSegura123"
+}
+```
+- **Resposta (`201 Created`):**
+```text
+usuarioCriado
 ```
 
-### 2. Configurar a Variável `JAVA_HOME` (caso necessário)
-Certifique-se de que a variável de ambiente `JAVA_HOME` aponta para a instalação do JDK 21. No Linux (Ubuntu), você pode exportar temporariamente ou adicionar ao seu `~/.bashrc`:
-```bash
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+#### Realizar Login
+- **POST** `/auth/login`
+- **Body:**
+```json
+{
+  "email": "usuario@exemplo.com",
+  "password": "senhaSegura123"
+}
+```
+- **Resposta (`200 OK`):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600000
+}
 ```
 
-### 3. Iniciar a API Java (Spring Boot)
-Com o banco de dados ativo, execute o comando abaixo na raiz do projeto para compilar e subir a aplicação:
+---
+
+### 2. Produtos (`/produto`)
+
+#### Criar Produto (Requer `ROLE_ADMIN`)
+- **POST** `/produto`
+- **Body:**
+```json
+{
+  "nome": "Smartphone Galaxy",
+  "preco": 1999.90,
+  "categoriasIds": [1, 2]
+}
+```
+- **Resposta (`200 OK`):**
+```json
+{
+  "id": 1,
+  "nome": "Smartphone Galaxy",
+  "preco": 1999.90,
+  "categorias": [
+    "Eletrônicos",
+    "Smartphones"
+  ]
+}
+```
+
+#### Listar Produtos com Filtros Opcionais
+- **GET** `/produto?categoria=Eletronicos&precoMin=1000&precoMax=3000`
+
+#### Listar Produtos Paginados
+- **GET** `/produto/pagina?page=0&size=10&sort=id,asc`
+- **GET** `/produto/pagina/1` (Página 1 com tamanho padrão de 10 itens)
+
+#### Buscar por ID
+- **GET** `/produto/{id}`
+
+#### Buscar por Nome
+- **GET** `/produto/nome/{nome}`
+
+#### Buscar por Faixa de Preço (com paginação)
+- **GET** `/produto/faixa-preco?precoMin=100.00&precoMax=500.00`
+- **GET** `/produto/faixa-preco/100.00/500.00`
+
+#### Atualizar Produto (Requer `ROLE_ADMIN`)
+- **PUT** `/produto/{id}`
+- **Body:**
+```json
+{
+  "nome": "Smartphone Galaxy Pro",
+  "preco": 2299.90,
+  "categoriasIds": [1]
+}
+```
+
+#### Deletar Produto (Requer `ROLE_ADMIN`)
+- **DELETE** `/produto/{id}`
+- **Resposta:** `204 No Content`
+
+---
+
+### 3. Categorias (`/categoria`)
+
+#### Criar Categoria (Requer `ROLE_ADMIN`)
+- **POST** `/categoria`
+- **Body:**
+```json
+{
+  "nome": "Informática"
+}
+```
+- **Resposta (`200 OK`):**
+```json
+{
+  "id": 1,
+  "nome": "Informática"
+}
+```
+
+#### Listar Categorias
+- **GET** `/categoria`
+- **Resposta (`200 OK`):**
+```json
+[
+  {
+    "id": 1,
+    "nome": "Informática"
+  }
+]
+```
+
+#### Consultar Produtos de uma Categoria
+- **GET** `/categoria/{id}`
+- **Resposta (`200 OK`):**
+```json
+[
+  {
+    "id": 1,
+    "nome": "Notebook Dell",
+    "preco": 3500.00
+  }
+]
+```
+
+---
+
+## 📖 Swagger / OpenAPI
+
+Com a aplicação em execução, a documentação interativa e testes de endpoints ficam disponíveis em:
+
+- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **OpenAPI JSON Docs:** `http://localhost:8080/v3/api-docs`
+
+---
+
+## 💻 Como Executar o Projeto
+
+### Pré-requisitos
+- **Java 21 (JDK)** instalado e configurado no `JAVA_HOME`.
+- **Docker** e **Docker Compose**.
+- **Maven** (opcional, o repositório inclui o Maven Wrapper `./mvnw`).
+
+---
+
+### Passo 1: Iniciar o Banco de Dados (MySQL)
+O banco de dados relacional roda conteinerizado via Docker Compose:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+> Caso queira interromper o container do banco posteriormente:
+> ```bash
+> docker compose -f docker/docker-compose.yml down
+> ```
+
+---
+
+### Passo 2: Executar a Aplicação Spring Boot
+
+Certifique-se de conceder permissão de execução ao Maven Wrapper e execute:
+
 ```bash
 chmod +x mvnw
 ./mvnw spring-boot:run
 ```
 
-A API estará disponível em `http://localhost:8080`.
+A API iniciará na porta padrão `8080` (`http://localhost:8080`).
 
 ---
 
-# Endpoints Principais
+### Passo 3: Executar a Suíte de Testes Automatizados
 
-## Autenticação
+O projeto conta com testes unitários cobrindo as regras de negócio dos serviços com **JUnit 5** e **Mockito**:
 
-POST /auth/register
-
-POST /auth/login
-
-## Produto
-
-POST /produto
-
-GET /produto
-
-GET /produto/{id}
-
-PUT /produto/{id}
-
-DELETE /produto/{id}
-
-GET /produto/nome/{nome}
-
-GET /produto/categoria/{categoria}
-
-GET /produto/faixa-preco/{min}/{max}
-
-## Categoria
-
-POST /categoria
-
-GET /categoria
-
-GET /categoria/{id}
+```bash
+./mvnw test
+```
 
 ---
 
-# Pontos Fortes
+## ⚙️ Variáveis de Ambiente e Configurações
 
-✅ Arquitetura em camadas
+As configurações do sistema residem em `src/main/resources/application.properties` e podem ser sobrescritas por variáveis de ambiente:
 
-✅ DTO Pattern
-
-✅ Mapper Pattern
-
-✅ Repository Pattern
-
-✅ Bean Validation
-
-✅ Tratamento global de exceções
-
-✅ Relacionamento Many-to-Many
-
-✅ Consultas customizadas com Spring Data JPA
-
-✅ Paginação
-
-✅ Spring Security
-
-✅ JWT Authentication
-
-✅ BCrypt Password Encoder
-
-✅ Controle de acesso por Roles
-
-✅ Docker Compose
-
-✅ Integração com MySQL
-
-✅ Swagger/OpenAPI
-
-✅ CI com GitHub Actions
+| Propriedade / Variável | Descrição | Padrão |
+| :--- | :--- | :--- |
+| `spring.datasource.url` | URL de conexão JDBC ao MySQL | `jdbc:mysql://localhost:3306/SistemaProdutos` |
+| `spring.datasource.username` | Usuário do banco de dados | `root` |
+| `spring.datasource.password` | Senha do banco de dados | `123` |
+| `JWT.KEY` | Chave secreta de assinatura HMAC do token JWT | Chave pré-configurada |
+| `JWT.EXPIRATION` | Tempo de expiração do token em milissegundos | `3600000` (1 hora) |
 
 ---
 
-# Próximas Evoluções
+## 🏗️ Estrutura do Projeto
 
-- Testes automatizados com JUnit e Mockito
-- Dockerfile da aplicação
-- Containerização completa da API
-- CD com GitHub Actions
-- Cobertura de testes
+```text
+produtos-api/
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # Pipeline de CI (Build e Test no GitHub Actions)
+├── docker/
+│   └── docker-compose.yml       # Orquestração do container MySQL
+├── src/
+│   ├── main/
+│   │   ├── java/com/bruno/sistemaProdutos/
+│   │   │   ├── config/          # Filtros e configurações de segurança e JWT
+│   │   │   ├── controller/      # Controladores REST expostos pela API
+│   │   │   ├── dto/             # Records de entrada/saída (Requests e Responses)
+│   │   │   ├── entity/          # Entidades JPA (Produto, Categoria, Usuario, Roles)
+│   │   │   ├── enums/           # Enums do domínio (Role: ROLE_BASIC, ROLE_ADMIN)
+│   │   │   ├── exception/       # Exceções customizadas e payload de erros
+│   │   │   ├── handler/         # GlobalExceptionHandler (@ControllerAdvice)
+│   │   │   ├── mapper/          # Conversores entre entidades e DTOs
+│   │   │   ├── repository/      # Interfaces de persistência Spring Data JPA
+│   │   │   ├── service/         # Camada de lógica de negócio e autenticação
+│   │   │   └── SistemaProdutosApplication.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+│       └── java/com/bruno/sistemaProdutos/
+│           ├── service/         # Testes unitários com JUnit 5 e Mockito
+│           └── SistemaProdutosApplicationTests.java
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── README.md
+```
 
 ---
 
+## 🎯 Próximas Evoluções
 
+- [ ] Maior cobertura de testes
+- [ ] Testes de integração de ponta a ponta com **MockMvc** e **Testcontainers**.
+- [ ] Criação de `Dockerfile` multi-stage para containerização completa da API.
+- [ ] Integração do compose da API junto ao banco de dados no Docker Compose.
+- [ ] Implementação de pipeline de Continuous Deployment (CD).
+- [ ] Cache distribuído com Redis para consultas frequentes de produtos e categorias.
