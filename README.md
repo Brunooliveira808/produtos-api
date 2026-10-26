@@ -20,6 +20,7 @@ O projeto foi construído seguindo as melhores práticas do ecossistema Spring: 
 - **Lombok**
 - **Apache Maven** (com Maven Wrapper `./mvnw`)
 - **Docker & Docker Compose**
+- **Flyway Migration** (Controle e versionamento evolutivo do banco de dados)
 - **JUnit 5 & Mockito** (Testes unitários automatizados)
 - **GitHub Actions** (Pipeline de Integração Contínua - CI)
 
@@ -81,9 +82,24 @@ erDiagram
     }
 ```
 
-- **Produto ↔ Categoria**: Relacionamento `@ManyToMany` mapeado pela tabela de junção `produto_categorias`.
+- **Produto ↔ Categoria**: Relacionamento `@ManyToMany` mapeado pela tabela de junção `produto_categoria`.
 - **Usuario ↔ Roles**: Relacionamento `@ManyToMany` (`FetchType.EAGER`) mapeado pela tabela `usuario_roles`.
 - **Preço**: Definido com `BigDecimal` (`precision = 19, scale = 2`) para garantir precisão monetária.
+
+---
+
+## 🗄️ Migrations do Banco de Dados (Flyway)
+
+O gerenciamento e versionamento da estrutura do banco de dados é automatizado com o **Flyway**. As migrações ficam localizadas em `src/main/resources/db/migration/` e são aplicadas automaticamente ao iniciar a aplicação:
+
+| Versão | Arquivo | Descrição |
+| :--- | :--- | :--- |
+| `V1` | `V1__create_tables_produto_e_categoria.sql` | Criação das tabelas `categoria`, `produto` e tabela de junção `produto_categoria` |
+| `V2` | `V2__create_tables_roles_e_usuarios.sql` | Criação das tabelas `roles`, `usuarios` e tabela de junção `usuario_roles` |
+| `V3` | `V3__seed_initial_roles.sql` | Carga inicial dos perfis de acesso padrão (`ROLE_BASIC` e `ROLE_ADMIN`) |
+
+> [!NOTE]
+> O Hibernate está configurado com `spring.jpa.hibernate.ddl-auto=validate`, garantindo que toda a evolução do banco de dados seja estritamente controlada via migrations versionadas pelo Flyway.
 
 ---
 
@@ -349,6 +365,8 @@ produtos-api/
 │   │   │   ├── service/         # Camada de lógica de negócio e autenticação
 │   │   │   └── SistemaProdutosApplication.java
 │   │   └── resources/
+│   │       ├── db/
+│   │       │   └── migration/   # Migrações versionadas do Flyway (V1, V2, V3)
 │   │       └── application.properties
 │   └── test/
 │       └── java/com/bruno/sistemaProdutos/
