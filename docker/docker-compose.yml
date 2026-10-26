@@ -6,7 +6,7 @@ services:
     expose:
       - "3306"
     environment:
-      - MYSQL_DATABASE=sistema_produtos
+      - MYSQL_DATABASE=produtos_api
       - MYSQL_USER=
       - MYSQL_PASSWORD=
       - MYSQL_ROOT_PASSWORD=
