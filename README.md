@@ -290,23 +290,43 @@ Com a aplicação em execução, a documentação interativa e testes de endpoin
 
 ---
 
-### Passo 1: Iniciar o Banco de Dados (MySQL)
-O banco de dados relacional roda conteinerizado via Docker Compose:
-
-```bash
-docker compose -f docker/docker-compose.yml up -d
-```
-
-> Caso queira interromper o container do banco posteriormente:
-> ```bash
-> docker compose -f docker/docker-compose.yml down
-> ```
+> [!IMPORTANT]
+> Escolha **uma** das opções abaixo para executar a API:
+> - **Opção 1**: Executa **tudo no Docker** (API + MySQL).
+> - **Opção 2**: Executa **apenas o MySQL no Docker** e roda a API localmente via `./mvnw spring-boot:run` (ideal para desenvolvimento diário e debug).
+> 
+> Não execute as duas simultaneamente para evitar conflito na porta `8080`.
 
 ---
 
-### Passo 2: Executar a Aplicação Spring Boot
+### Opção 1: Rodar tudo conteinerizado (API + MySQL) via Docker Compose
 
-Certifique-se de conceder permissão de execução ao Maven Wrapper e execute:
+1. Inicie todos os containers:
+   ```bash
+   docker compose -f docker/docker-compose.yml up --build -d
+   ```
+2. Acompanhe os logs da aplicação:
+   ```bash
+   docker compose -f docker/docker-compose.yml logs -f api
+   ```
+3. Para parar os containers:
+   ```bash
+   docker compose -f docker/docker-compose.yml down
+   ```
+
+---
+
+### Opção 2: Iniciar apenas o Banco (MySQL) e rodar a API localmente
+
+#### Passo 1: Iniciar o Banco de Dados (MySQL)
+```bash
+docker compose -f docker/docker-compose.yml up -d mysql
+```
+
+---
+
+#### Passo 2: Executar a Aplicação Spring Boot localmente
+Basta executar:
 
 ```bash
 chmod +x mvnw
@@ -314,6 +334,11 @@ chmod +x mvnw
 ```
 
 A API iniciará na porta padrão `8080` (`http://localhost:8080`).
+
+> Para interromper o container do banco quando terminar:
+> ```bash
+> docker compose -f docker/docker-compose.yml down
+> ```
 
 ---
 
