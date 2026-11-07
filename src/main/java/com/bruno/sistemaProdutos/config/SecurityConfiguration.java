@@ -44,8 +44,8 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.GET, "/categoria").permitAll()
                     .requestMatchers(HttpMethod.POST, "/categoria").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/produto").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/produto").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/produto").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/produto/**").hasRole("ADMIN")
+					.requestMatchers(HttpMethod.DELETE, "/produto/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ) //permitir acesso às rotas
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
