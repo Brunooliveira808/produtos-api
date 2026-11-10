@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bruno.sistemaProdutos.dto.produto.ProdutoRequest;
 import com.bruno.sistemaProdutos.dto.produto.ProdutoResponse;
@@ -17,6 +18,7 @@ import com.bruno.sistemaProdutos.repository.CategoriaRepository;
 import com.bruno.sistemaProdutos.repository.ProdutoRepository;
 
 @Service
+@Transactional
 public class ProdutoService {
 
 	private final ProdutoRepository produtoRepository;
@@ -32,12 +34,10 @@ public class ProdutoService {
 		this.produtoMapper = produtoMapper;
 	}
 
+	@Transactional(readOnly = true)
 	public List<ProdutoResponse> busca(String categoria, BigDecimal precoMin, BigDecimal precoMax) {
-		return produtoRepository.findByCategoriasNomeIgnoreCase(categoria)
+		return produtoRepository.buscarPorFiltros(categoria, precoMin, precoMax)
 				.stream()
-				.filter(produto -> produto.getPreco() != null
-						&& (precoMin == null || produto.getPreco().compareTo(precoMin) >= 0)
-						&& (precoMax == null || produto.getPreco().compareTo(precoMax) <= 0))
 				.map(produtoMapper::toResponse)
 				.toList();
 	}
@@ -48,12 +48,14 @@ public class ProdutoService {
 		return produtoMapper.toResponse(produto);
 	}
 
+	@Transactional(readOnly = true)
 	public ProdutoResponse buscarPorId(Long id) {
 		Produto produto = produtoRepository.findById(id).orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
 		return produtoMapper.toResponse(produto);
 	}
 	
+	@Transactional(readOnly = true)
 	public List<ProdutoResponse> listarProdutosPorCategoria(String categoria) {
 		return produtoRepository.findByCategoriasNomeIgnoreCase(categoria)
 				.stream()
@@ -61,6 +63,7 @@ public class ProdutoService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<ProdutoResponse> listarProdutosPorNome(String nome) {
 		return produtoRepository.findByNomeContainingIgnoreCase(nome)
 				.stream()
@@ -68,11 +71,13 @@ public class ProdutoService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public Page<ProdutoResponse> listarProdutosPorPagina(Pageable pageable) {
 		return produtoRepository.findAll(pageable)
 				.map(produtoMapper::toResponse);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<ProdutoResponse> listarProdutosPorFaixaDePreco(BigDecimal precoMin, BigDecimal precoMax, Pageable pageable) {
 		return produtoRepository.findByPrecoBetween(precoMin, precoMax, pageable)
 				.map(produtoMapper::toResponse);

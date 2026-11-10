@@ -117,13 +117,8 @@ public class ProdutoServiceTest {
     @Test
     @DisplayName("Deve buscar produtos por categoria e faixa de preco")
     void deveBuscarProdutosPorCategoriaEFaixaDePreco() {
-        Produto produto2 = new Produto();
-        produto2.setId(2L);
-        produto2.setNome("Notebook");
-        produto2.setPreco(new BigDecimal("3000.00"));
-        produto2.setCategorias(List.of(categoria));
-
-        when(produtoRepository.findByCategoriasNomeIgnoreCase("Eletrônicos")).thenReturn(List.of(produto, produto2));
+        when(produtoRepository.buscarPorFiltros("Eletrônicos", new BigDecimal("1000.00"), new BigDecimal("2000.00")))
+                .thenReturn(List.of(produto));
         when(produtoMapper.toResponse(produto)).thenReturn(produtoResponse);
 
         List<ProdutoResponse> resultado = produtoService.busca("Eletrônicos", new BigDecimal("1000.00"), new BigDecimal("2000.00"));
@@ -131,7 +126,7 @@ public class ProdutoServiceTest {
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
         assertEquals("Smartphone", resultado.getFirst().nome());
-        verify(produtoRepository, times(1)).findByCategoriasNomeIgnoreCase("Eletrônicos");
+        verify(produtoRepository, times(1)).buscarPorFiltros("Eletrônicos", new BigDecimal("1000.00"), new BigDecimal("2000.00"));
     }
 
     @Test
