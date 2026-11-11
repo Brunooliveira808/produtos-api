@@ -392,7 +392,9 @@ As configurações do sistema residem em `src/main/resources/application.propert
 
 ---
 
-## 🏗️ Estrutura do Projeto
+## 🏗️ Estrutura do Projeto (Monólito Modular)
+
+A arquitetura do projeto foi estruturada seguindo o padrão de **Monólito Modular** orientado a domínios (*Bounded Contexts*), garantindo alto encapsulamento, separação de responsabilidades e facilitando a futura extração de novos módulos (como `pedidos` ou `estoque`):
 
 ```text
 produtos-api/
@@ -405,16 +407,23 @@ produtos-api/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/bruno/sistemaProdutos/
-│   │   │   ├── config/          # Filtros e configurações de segurança e JWT
-│   │   │   ├── controller/      # Controladores REST expostos pela API
-│   │   │   ├── dto/             # Records de entrada/saída (Requests e Responses)
-│   │   │   ├── entity/          # Entidades JPA (Produto, Categoria, Usuario, Roles)
-│   │   │   ├── enums/           # Enums do domínio (Role: ROLE_BASIC, ROLE_ADMIN)
-│   │   │   ├── exception/       # Exceções customizadas e payload de erros
-│   │   │   ├── handler/         # GlobalExceptionHandler (@ControllerAdvice)
-│   │   │   ├── mapper/          # Conversores entre entidades e DTOs
-│   │   │   ├── repository/      # Interfaces de persistência Spring Data JPA
-│   │   │   ├── service/         # Camada de lógica de negócio e autenticação
+│   │   │   ├── catalogo/        # 📦 MÓDULO CATÁLOGO (Produtos e Categorias)
+│   │   │   │   ├── controller/  # Endpoints REST (/produtos, /categorias)
+│   │   │   │   ├── service/     # Regras de negócio de produtos e categorias
+│   │   │   │   ├── repository/  # Interfaces Spring Data JPA
+│   │   │   │   ├── entity/      # Entidades Produto e Categoria
+│   │   │   │   ├── mapper/      # Mapeamento Entity <-> DTO
+│   │   │   │   └── dto/         # Records de request e response do catálogo
+│   │   │   ├── auth/            # 📦 MÓDULO AUTENTICAÇÃO & USUÁRIOS
+│   │   │   │   ├── controller/  # Endpoints REST (/auth/login, /auth/register)
+│   │   │   │   ├── service/     # AuthenticationService e UserDetailsServiceImpl
+│   │   │   │   ├── repository/  # UsuarioRepository e RolesRepository
+│   │   │   │   ├── entity/      # Entidades Usuario e Roles
+│   │   │   │   ├── enums/       # Enum Role (ROLE_BASIC, ROLE_ADMIN)
+│   │   │   │   └── dto/         # DTOs de login, registro e tokens
+│   │   │   ├── shared/          # 🌐 RECURSOS TRANSVERSAIS (Compartilhados)
+│   │   │   │   ├── security/    # SecurityConfiguration, TokenProvider, JwtFilter
+│   │   │   │   └── exception/   # GlobalExceptionHandler, NotFoundException, ErrorResponse
 │   │   │   └── SistemaProdutosApplication.java
 │   │   └── resources/
 │   │       ├── db/
@@ -422,7 +431,8 @@ produtos-api/
 │   │       └── application.properties
 │   └── test/
 │       └── java/com/bruno/sistemaProdutos/
-│           ├── service/         # Testes unitários com JUnit 5 e Mockito
+│           ├── catalogo/service/ # Testes unitários do catálogo (JUnit 5 + Mockito)
+│           ├── shared/security/  # Testes de autenticação e filtros JWT
 │           └── SistemaProdutosApplicationTests.java
 ├── mvnw
 ├── mvnw.cmd
@@ -436,6 +446,8 @@ produtos-api/
 
 - [x] Criação de `Dockerfile` multi-stage para containerização completa da API.
 - [x] Orquestração completa da API junto ao banco de dados no Docker Compose com variáveis de ambiente.
+- [x] Arquitetura em **Monólito Modular** dividida em domínios (`catalogo`, `auth`, `shared`).
+- [ ] Criação de novos módulos de negócio: módulo de `pedidos` e módulo de `estoque`.
 - [ ] Maior cobertura de testes unitários.
 - [ ] Testes de integração de ponta a ponta com **MockMvc** e **Testcontainers**.
 - [ ] Implementação de pipeline de Continuous Deployment (CD).
