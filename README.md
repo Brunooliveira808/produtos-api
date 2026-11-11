@@ -284,29 +284,74 @@ Com a aplicação em execução, a documentação interativa e testes de endpoin
 ## 💻 Como Executar o Projeto
 
 ### Pré-requisitos
-- **Java 21 (JDK)** instalado e configurado no `JAVA_HOME`.
-- **Docker** e **Docker Compose**.
+- **Docker** e **Docker Compose** instalados.
+- **Java 21 (JDK)** (apenas se for executar localmente fora do container).
 - **Maven** (opcional, o repositório inclui o Maven Wrapper `./mvnw`).
 
 ---
 
-### Passo 1: Iniciar o Banco de Dados (MySQL)
-O banco de dados relacional roda conteinerizado via Docker Compose:
+### 1. Configurar as Variáveis de Ambiente
+
+Antes de iniciar os containers ou a aplicação, crie o seu arquivo `.env` a partir do modelo `.env.example`:
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+cp .env.example .env
 ```
 
-> Caso queira interromper o container do banco posteriormente:
-> ```bash
-> docker compose -f docker/docker-compose.yml down
-> ```
+> [!TIP]
+> O arquivo `.env` já vem pré-configurado com valores padrões funcionais para testes locais. Altere as senhas e a chave `JWT_KEY` conforme sua necessidade. O `.env` é ignorado pelo Git para proteger suas credenciais.
 
 ---
 
-### Passo 2: Executar a Aplicação Spring Boot
+### 2. Escolha como executar a aplicação
 
-Certifique-se de conceder permissão de execução ao Maven Wrapper e execute:
+> [!IMPORTANT]
+> Escolha **uma** das opções abaixo para executar a API:
+> - **Opção 1**: Executa **tudo no Docker** (API + MySQL) usando o Dockerfile multistage e compose.
+> - **Opção 2**: Executa **apenas o MySQL no Docker** e roda a API localmente via `./mvnw spring-boot:run` (ideal para desenvolvimento diário e debug rápido).
+> 
+> Não execute as duas simultaneamente para evitar conflito na porta `8080`.
+
+---
+
+### Opção 1: Rodar tudo conteinerizado (API + MySQL) via Docker Compose
+
+Esta é a opção recomendada para testar o ambiente idêntico a produção:
+
+1. **Construa as imagens e inicie todos os serviços em segundo plano:**
+   ```bash
+   docker compose up --build -d
+   ```
+2. **Acompanhe os logs da aplicação:**
+   ```bash
+   docker compose logs -f api
+   ```
+   *(Pressione `Ctrl + C` para sair dos logs sem parar os containers).*
+
+3. **Verificar o status dos serviços:**
+   ```bash
+   docker compose ps
+   ```
+
+4. **Para parar todos os containers:**
+   ```bash
+   docker compose down
+   ```
+   *(Para parar e apagar também o volume persistente do banco, use `docker compose down -v`).*
+
+---
+
+### Opção 2: Iniciar apenas o Banco (MySQL) e rodar a API localmente
+
+Ideal para quem deseja debugar breakpoints na IDE ou alterar código com recarga rápida:
+
+#### Passo 1: Iniciar apenas o MySQL no Docker
+```bash
+docker compose up -d mysql
+```
+
+#### Passo 2: Executar a Aplicação Spring Boot localmente
+Exporte as variáveis ou execute com o Maven Wrapper:
 
 ```bash
 chmod +x mvnw
@@ -314,6 +359,11 @@ chmod +x mvnw
 ```
 
 A API iniciará na porta padrão `8080` (`http://localhost:8080`).
+
+> Para interromper o container do banco quando terminar:
+> ```bash
+> docker compose down
+> ```
 
 ---
 
@@ -329,15 +379,16 @@ O projeto conta com testes unitários cobrindo as regras de negócio dos serviç
 
 ## ⚙️ Variáveis de Ambiente e Configurações
 
-As configurações do sistema residem em `src/main/resources/application.properties` e podem ser sobrescritas por variáveis de ambiente:
+As configurações do sistema residem em `src/main/resources/application.properties` e são alimentadas dinamicamente pelo arquivo `.env`:
 
-| Propriedade / Variável | Descrição | Padrão |
+| Variável (.env) | Descrição | Exemplo Padrão |
 | :--- | :--- | :--- |
-| `spring.datasource.url` | URL de conexão JDBC ao MySQL | `jdbc:mysql://localhost:3306/SistemaProdutos` |
-| `spring.datasource.username` | Usuário do banco de dados | `root` |
-| `spring.datasource.password` | Senha do banco de dados | `123` |
-| `JWT.KEY` | Chave secreta de assinatura HMAC do token JWT | Chave pré-configurada |
-| `JWT.EXPIRATION` | Tempo de expiração do token em milissegundos | `3600000` (1 hora) |
+| `MYSQL_DATABASE` | Nome do banco/schema MySQL | `produtosapi` |
+| `MYSQL_USER` | Usuário comum criado para a aplicação | `appuser` |
+| `MYSQL_PASSWORD` | Senha do usuário da aplicação | `123` |
+| `MYSQL_ROOT_PASSWORD` | Senha administrativa do MySQL | `123` |
+| `JWT_KEY` | Chave secreta de assinatura HMAC do token JWT | Chave HMAC de 256+ bits |
+| `JWT_EXPIRATION` | Tempo de expiração do token em milissegundos | `3600000` (1 hora) |
 
 ---
 
@@ -348,8 +399,9 @@ produtos-api/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # Pipeline de CI (Build e Test no GitHub Actions)
-├── docker/
-│   └── docker-compose.yml       # Orquestração do container MySQL
+├── .env.example                 # Template de variáveis de ambiente
+├── docker-compose.yml           # Orquestração dos containers (API + MySQL)
+├── Dockerfile                   # Build multistage (Eclipse Temurin 21 JDK/JRE)
 ├── src/
 │   ├── main/
 │   │   ├── java/com/bruno/sistemaProdutos/
@@ -382,9 +434,9 @@ produtos-api/
 
 ## 🎯 Próximas Evoluções
 
-- [ ] Maior cobertura de testes
+- [x] Criação de `Dockerfile` multi-stage para containerização completa da API.
+- [x] Orquestração completa da API junto ao banco de dados no Docker Compose com variáveis de ambiente.
+- [ ] Maior cobertura de testes unitários.
 - [ ] Testes de integração de ponta a ponta com **MockMvc** e **Testcontainers**.
-- [ ] Criação de `Dockerfile` multi-stage para containerização completa da API.
-- [ ] Integração do compose da API junto ao banco de dados no Docker Compose.
 - [ ] Implementação de pipeline de Continuous Deployment (CD).
 - [ ] Cache distribuído com Redis para consultas frequentes de produtos e categorias.
